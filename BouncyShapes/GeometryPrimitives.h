@@ -11,3 +11,9 @@ struct Color4F {
 	float b;
 	float a;
 };
+
+struct Speed2DF //2-dimensional speed as floats
+{
+	float x;
+	float y;
+};

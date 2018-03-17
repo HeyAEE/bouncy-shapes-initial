@@ -1,7 +1,12 @@
 #include <memory>
+#include <vector>
+#include <ctime>
+#include <random>
+
 using namespace std;
 
 #define NOMINMAX
+//#define RAND_MAX 255
 
 #include <wrl.h>
 #include <atlbase.h>
@@ -32,6 +37,7 @@ inline void HR(HRESULT hr)
 
 #include "Scene.h"
 #include "CircleRenderer.h"
+#include "SquareRenderer.h"
 #include "Engine.h"
 
 template <typename T>
@@ -197,17 +203,65 @@ public:
 		: _scene{}, _engine{}
 	{
 		// initialize device resources
-		auto brushDeviceResource = make_shared<BrushDeviceResource>();
+		brushDeviceResource = make_shared<BrushDeviceResource>();
 		_engine.AddDeviceResource(static_pointer_cast<IDeviceResource, BrushDeviceResource>(brushDeviceResource));
 
-		// initialize renderers
-		auto yellowCircleRenderer = make_shared<CircleRenderer>(brushDeviceResource, Color4F{ 1.f, 1.f, 0.f, 1.f }, 50.f);
-		// TODO: add more renderers here
+
 
 		// setup scene
-		auto gameObject = make_unique<GameObject>(static_pointer_cast<IRenderer, CircleRenderer>(yellowCircleRenderer), MPoint2F{ 150.f, 150.f });
-		_scene.insertGameObject(gameObject);
-		// TODO: add more objects to the scene
+		//auto gameObject = make_unique<GameObject>(static_pointer_cast<IRenderer, CircleRenderer>(yellowCircleRenderer), MPoint2F{ 150.f, 150.f });
+		//_scene.insertGameObject(gameObject);
+		//for (auto it = objects.begin(); it != objects.end(); ++it)
+		//{
+
+		//	float x = float(rand() % 500);
+		//	float y = float(rand() % 500);
+		//	auto gameObject = make_unique<GameObject>(static_pointer_cast<IRenderer, CircleRenderer>(*it), MPoint2F{ x, y });
+		//	_scene.insertGameObject(gameObject);
+		//}
+		// TODO: add more objects to the scene --> DONE (randomly generated)
+	}
+
+	virtual void MakeShapes(int width, int height)
+	{
+		// initialize renderers
+		auto yellowCircleRenderer = make_shared<CircleRenderer>(brushDeviceResource, Color4F{ 1.f, 1.f, 0.f, 1.f }, 50.f);
+		//// TODO: add more renderers here
+		//auto redCircleRenderer = make_shared<CircleRenderer>(brushDeviceResource, Color4F{ 255.f, 1.f, 1.f, 1.f }, 50.f);
+
+		circleObjects.push_back(yellowCircleRenderer);
+		random_device device;
+		mt19937 engine(device());
+		uniform_real_distribution<> dist(0.0, 1.0);
+		while (circleObjects.size() <= 10)
+		{
+			circleObjects.push_back(make_shared<CircleRenderer>(brushDeviceResource, Color4F{ float(dist(engine)), float(dist(engine)), float(dist(engine)), 1.f }, float(rand() % 100)));
+			squareObjects.push_back(make_shared<SquareRenderer>(brushDeviceResource, Color4F{ float(dist(engine)), float(dist(engine)), float(dist(engine)), 1.f }, float(rand() % 100)));
+
+		}
+
+		uniform_real_distribution<> dist2(-1.0, 1.0);
+		for (auto it = circleObjects.begin(); it != circleObjects.end(); ++it)
+		{
+
+			float x = float(rand() % int(width));
+			float y = float(rand() % int(height));
+			float spx = float(10 * dist2(engine));
+			float spy = float(10 * dist2(engine));
+			auto gameObject = make_unique<GameObject>(static_pointer_cast<IRenderer, CircleRenderer>(*it), MPoint2F{ x, y }, Speed2DF{ spx, spy });
+			_scene.insertGameObject(gameObject);
+		}
+
+		for (auto it = squareObjects.begin(); it != squareObjects.end(); ++it)
+		{
+
+			float x = float(rand() % int(width));
+			float y = float(rand() % int(height));
+			float spx = float(10 * dist(engine));
+			float spy = float(10 * dist(engine));
+			auto gameObject = make_unique<GameObject>(static_pointer_cast<IRenderer, SquareRenderer>(*it), MPoint2F{ x, y }, Speed2DF{ spx, spy });
+			_scene.insertGameObject(gameObject);
+		}
 	}
 
 	virtual void CreateDeviceResources() override
@@ -218,10 +272,12 @@ public:
 	virtual void Draw() override
 	{
 		_target->Clear(D2D_COLOR_F{ 0.26f, 0.56f, 0.87f, 1.0f });
-
-		auto size = _target->GetSize();
-
 		_scene.Draw(*_target.Get());
+	}
+
+	virtual D2D1_SIZE_F WindowSize()
+	{
+		return _windowsize;
 	}
 
 	virtual void Update(double deltaTime) override
@@ -232,6 +288,10 @@ public:
 private:
 	Scene _scene;
 	Engine _engine;
+	vector<shared_ptr<CircleRenderer>> circleObjects;
+	vector<shared_ptr<SquareRenderer>> squareObjects;
+	shared_ptr<BrushDeviceResource> brushDeviceResource;
+	D2D1_SIZE_F _windowsize;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
@@ -239,6 +299,8 @@ int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 	SampleWindow window;
 	
 	window.Create();
-
+//	window.Draw();
+	auto size = window.WindowSize();
+	window.MakeShapes(500, 500);
 	return window.Run();
 }

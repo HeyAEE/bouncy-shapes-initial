@@ -28,5 +28,19 @@ void Scene::Draw(ID2D1HwndRenderTarget & target)
 	{
 		const auto& renderer = object->getRenderer();
 		renderer.Render(target, object->getLocation());
+		BoundsCheck(size, *object);
+	}
+}
+
+void Scene::BoundsCheck(D2D1_SIZE_F& size, GameObject& object)
+{
+	MPoint2F location = object.getLocation();
+	if (location.x < 0 || location.x > size.width)
+	{
+		object.changeXSpeed();
+	}
+	if (location.y < 0 || location.y > size.height)
+	{
+		object.changeYSpeed();
 	}
 }

@@ -13,6 +13,8 @@ public:
 
 	void Draw(ID2D1HwndRenderTarget& target);
 
+	void BoundsCheck(D2D1_SIZE_F& size, GameObject& object);
+
 private:
 	std::vector<std::unique_ptr<GameObject>> _gameObjects = {};
 };

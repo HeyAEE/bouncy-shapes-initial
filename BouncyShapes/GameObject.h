@@ -14,6 +14,8 @@ public:
 	const MPoint2F& getLocation();
 	const Speed2DF& getSpeed();
 	void setSpeed(float& vel);
+	void changeXSpeed();
+	void changeYSpeed();
 	void setLocation(MPoint2F newLocation);
 
 private:

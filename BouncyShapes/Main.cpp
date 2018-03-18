@@ -99,7 +99,6 @@ public:
 	void Create()
 	{
 		D2D1_FACTORY_OPTIONS fo = {};
-
 #ifdef DEBUG
 		fo.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 #endif
@@ -122,10 +121,15 @@ public:
 		// create render target if needed
 		if (!_target)
 		{
+//			_target->Resize(SizeU(640, 480)&);
 			RECT rect;
 			VERIFY(GetClientRect(&rect));
+//			_windowsize = D2D1_SIZE_F{ float(rect.right), float(rect.bottom) };
 
-			auto size = SizeU(rect.right, rect.bottom);
+
+			// Below is the relative size of the window. Still looking for the absolute original size.
+			 auto size = SizeU(rect.right, rect.bottom);
+			// auto size = SizeU(640, 480); 
 
 			HR(_factory->CreateHwndRenderTarget(RenderTargetProperties(),
 				HwndRenderTargetProperties(m_hWnd, size),
@@ -195,6 +199,14 @@ public:
 
 		return 0;
 	}
+
+	D2D1_SIZE_F GetWindowSize()
+	{
+		return D2D1_SIZE_F{ RenderTargetProperties().dpiX, RenderTargetProperties().dpiY };
+	}
+//
+//private:
+//	D2D1_SIZE_F _windowsize;
 };
 
 class SampleWindow : public DesktopWindow<SampleWindow> {
@@ -275,10 +287,6 @@ public:
 		_scene.Draw(*_target.Get());
 	}
 
-	virtual D2D1_SIZE_F WindowSize()
-	{
-		return _windowsize;
-	}
 
 	virtual void Update(double deltaTime) override
 	{
@@ -291,7 +299,6 @@ private:
 	vector<shared_ptr<CircleRenderer>> circleObjects;
 	vector<shared_ptr<SquareRenderer>> squareObjects;
 	shared_ptr<BrushDeviceResource> brushDeviceResource;
-	D2D1_SIZE_F _windowsize;
 };
 
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
@@ -299,8 +306,6 @@ int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 	SampleWindow window;
 	
 	window.Create();
-//	window.Draw();
-	auto size = window.WindowSize();
 	window.MakeShapes(500, 500);
 	return window.Run();
 }

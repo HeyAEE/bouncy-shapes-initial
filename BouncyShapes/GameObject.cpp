@@ -25,6 +25,16 @@ void GameObject::setSpeed(float& vel)
 	vel = -vel;
 }
 
+void GameObject::changeXSpeed()
+{
+	GameObject::setSpeed(GameObject::_speed.x);
+}
+
+void GameObject::changeYSpeed()
+{
+	GameObject::setSpeed(GameObject::_speed.y);
+}
+
 void GameObject::setLocation(MPoint2F newLocation) 
 {
 	_location = newLocation;
